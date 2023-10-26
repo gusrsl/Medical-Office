@@ -15,8 +15,28 @@ import { ResultadoExamenModule } from './resource/resultado-examen/resultado-exa
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as dotenv from 'dotenv';
+import { Logger } from '@nestjs/common';
 
 dotenv.config(); // Cargar variables de entorno desde .env
+
+const logger = new Logger('Database');
+
+async function bootstrap() {
+  await TypeOrmModule.forRoot({
+    type: 'postgres',
+    host: process.env.POSTGRES_HOST,
+    port: parseInt(process.env.POSTGRES_PORT, 10),
+    username: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DATABASE,
+    synchronize: true,
+    logging: true,
+  });
+
+  logger.log('Connected to PostgreSQL');
+}
+
+bootstrap();
 
 @Module({
   imports: [
@@ -30,15 +50,6 @@ dotenv.config(); // Cargar variables de entorno desde .env
     EnfermedadModule, 
     LaboratorioModule, 
     ResultadoExamenModule,
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: parseInt(process.env.POSTGRES_PORT, 10),
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DATABASE,
-      // ...
-    }),
     MongooseModule.forRoot(process.env.MONGODB_URI),
   ],
   controllers: [AppController],

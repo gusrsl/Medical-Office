@@ -1,26 +1,59 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePacienteDto } from './dto/create-paciente.dto';
-import { UpdatePacienteDto } from './dto/update-paciente.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { PacienteEntity } from './entities/paciente.entity';
 
 @Injectable()
 export class PacienteService {
-  create(createPacienteDto: CreatePacienteDto) {
-    return 'This action adds a new paciente';
+  constructor(
+    @InjectRepository(PacienteEntity)
+    private pacienteRepositoryPG: Repository<PacienteEntity>,
+    @InjectModel('Paciente')
+    private pacienteModelMongo: Model<PacienteEntity>,
+  ) {}
+
+  // Funciones comunes para ambas bases de datos
+  async create(paciente: PacienteEntity): Promise<PacienteEntity> {
+    if (process.env.DB_TYPE === 'pg') {
+      return this.pacienteRepositoryPG.save(paciente);
+    } else if (process.env.DB_TYPE === 'mongo') {
+      const createdPaciente = new this.pacienteModelMongo(paciente);
+      return createdPaciente.save();
+    }
   }
 
-  findAll() {
-    return `This action returns all paciente`;
+  async findAll(): Promise<PacienteEntity[]> {
+    if (process.env.DB_TYPE === 'pg') {
+      return this.pacienteRepositoryPG.find();
+    } else if (process.env.DB_TYPE === 'mongo') {
+      return this.pacienteModelMongo.find().exec();
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} paciente`;
+  async findOne(id: number): Promise<PacienteEntity> {
+    if (process.env.DB_TYPE === 'pg') {
+      return this.pacienteRepositoryPG.findOne(id);
+    } else if (process.env.DB_TYPE === 'mongo') {
+      return this.pacienteModelMongo.findById(id).exec();
+    }
   }
 
-  update(id: number, updatePacienteDto: UpdatePacienteDto) {
-    return `This action updates a #${id} paciente`;
+  async update(id: number, paciente: PacienteEntity): Promise<PacienteEntity> {
+    if (process.env.DB_TYPE === 'pg') {
+      await this.pacienteRepositoryPG.update(id, paciente);
+      return this.pacienteRepositoryPG.findOne(id);
+    } else if (process.env.DB_TYPE === 'mongo') {
+      return this.pacienteModelMongo.findByIdAndUpdate(id, paciente, { new: true }).exec();
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} paciente`;
+  async remove(id: number): Promise<void> {
+    if (process.env.DB_TYPE === 'pg') {
+      await this.pacienteRepositoryPG.delete(id);
+    } else if (process.env.DB_TYPE === 'mongo') {
+      await this.pacienteModelMongo.findByIdAndRemove(id).exec();
+    }
   }
 }
