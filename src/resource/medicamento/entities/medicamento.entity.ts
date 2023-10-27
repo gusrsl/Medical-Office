@@ -1,11 +1,13 @@
-/* eslint-disable prettier/prettier */
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
-export class LicenciaEntity {
+export class MedicamentoEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  numeroLicencia: string;
+  nombre: string;
+
+  @Column()
+  descripcion: string;
 }

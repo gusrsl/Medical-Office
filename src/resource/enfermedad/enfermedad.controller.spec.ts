@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Test, TestingModule } from '@nestjs/testing';
 import { EnfermedadController } from './enfermedad.controller';
 import { EnfermedadService } from './enfermedad.service';

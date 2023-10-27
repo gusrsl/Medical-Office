@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -14,29 +15,11 @@ import { ResultadoExamenModule } from './resource/resultado-examen/resultado-exa
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
+import { MedicamentoModule } from './resource/medicamento/medicamento.module';
 import * as dotenv from 'dotenv';
-import { Logger } from '@nestjs/common';
 
 dotenv.config(); // Cargar variables de entorno desde .env
 
-const logger = new Logger('Database');
-
-async function bootstrap() {
-  await TypeOrmModule.forRoot({
-    type: 'postgres',
-    host: process.env.POSTGRES_HOST,
-    port: parseInt(process.env.POSTGRES_PORT, 10),
-    username: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    database: process.env.POSTGRES_DATABASE,
-    synchronize: true,
-    logging: true,
-  });
-
-  logger.log('Connected to PostgreSQL');
-}
-
-bootstrap();
 
 @Module({
   imports: [
@@ -50,7 +33,19 @@ bootstrap();
     EnfermedadModule, 
     LaboratorioModule, 
     ResultadoExamenModule,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.POSTGRES_HOST,
+      port: parseInt(process.env.POSTGRES_PORT, 10),
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DATABASE,
+      synchronize: true,
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      logging: true,
+    }),
     MongooseModule.forRoot(process.env.MONGODB_URI),
+    MedicamentoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,24 +1,20 @@
+/* eslint-disable prettier/prettier */
+// paciente.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 
-@Entity('paciente')
-@Schema()
+@Entity()
 export class PacienteEntity {
   @PrimaryGeneratedColumn()
-  @Prop({ type: Number })
-  pacienteID: number;
+  id: number;
 
   @Column()
-  @Prop({ type: String })
   nombre: string;
 
   @Column()
-  @Prop({ type: String })
   apellido: string;
 
-  @Column({ type: 'date' })
-  @Prop({ type: Date })
+  @Column()
   fechaNacimiento: Date;
-}
 
-export const PacienteSchema = SchemaFactory.createForClass(PacienteEntity);
+  // Otras propiedades específicas de PostgreSQL
+}

@@ -1,59 +1,95 @@
-import { Injectable } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
+// paciente.service.ts
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { PacienteEntity } from './entities/paciente.entity';
+import { PacienteModel } from './model/paciente.model';
+import { CreatePacienteDto } from './dto/create-paciente.dto';
 
 @Injectable()
 export class PacienteService {
   constructor(
-    @InjectRepository(PacienteEntity)
-    private pacienteRepositoryPG: Repository<PacienteEntity>,
-    @InjectModel('Paciente')
-    private pacienteModelMongo: Model<PacienteEntity>,
+    @InjectRepository(PacienteEntity) // Inyección para TypeORM
+    private pacienteRepository: Repository<PacienteEntity>,
+    @InjectModel('Paciente') // Inyección para Mongoose
+    private pacienteModel: Model<PacienteModel>,
   ) {}
 
-  // Funciones comunes para ambas bases de datos
-  async create(paciente: PacienteEntity): Promise<PacienteEntity> {
-    if (process.env.DB_TYPE === 'pg') {
-      return this.pacienteRepositoryPG.save(paciente);
-    } else if (process.env.DB_TYPE === 'mongo') {
-      const createdPaciente = new this.pacienteModelMongo(paciente);
-      return createdPaciente.save();
+  
+  async create(createPacienteDto: CreatePacienteDto, database: string): Promise<PacienteEntity | PacienteModel> {
+    if (database === 'pg') {
+      const newPaciente = this.pacienteRepository.create(createPacienteDto);
+      return this.pacienteRepository.save(newPaciente);
+    } else if (database === 'mongo') {
+      const newPaciente = new this.pacienteModel(createPacienteDto);
+      return newPaciente.save();
+    } else {
+      throw new BadRequestException('Base de datos no válida');
     }
   }
 
-  async findAll(): Promise<PacienteEntity[]> {
-    if (process.env.DB_TYPE === 'pg') {
-      return this.pacienteRepositoryPG.find();
-    } else if (process.env.DB_TYPE === 'mongo') {
-      return this.pacienteModelMongo.find().exec();
+  async findOne(id: string | number, database: string): Promise<PacienteEntity | PacienteModel> {
+    if (database === 'pg') {
+      if (typeof id === 'string') {
+        throw new BadRequestException('ID de Paciente no válido para PostgreSQL');
+      }
+  
+      return this.pacienteRepository.findOne({ where: { id: id } });
+    } else if (database === 'mongo') {
+      if (typeof id === 'number') {
+        throw new BadRequestException('ID de Paciente no válido para MongoDB');
+      }
+  
+      return this.pacienteModel.findById(id).exec();
+    } else {
+      throw new BadRequestException('Base de datos no válida');
     }
   }
 
-  async findOne(id: number): Promise<PacienteEntity> {
-    if (process.env.DB_TYPE === 'pg') {
-      return this.pacienteRepositoryPG.findOne(id);
-    } else if (process.env.DB_TYPE === 'mongo') {
-      return this.pacienteModelMongo.findById(id).exec();
+  async update(id: string | number, updatePacienteDto: CreatePacienteDto, database: string): Promise<PacienteEntity | PacienteModel> {
+    const existingPaciente = await this.findOne(id, database);
+    if (!existingPaciente) {
+      throw new NotFoundException('Paciente no encontrado');
+    }
+
+    if (database === 'pg') {
+      await this.pacienteRepository.update(id, updatePacienteDto);
+    } else if (database === 'mongo') {
+      await this.pacienteModel.findByIdAndUpdate(id, updatePacienteDto).exec();
+    } else {
+      throw new BadRequestException('Base de datos no válida');
+    }
+
+    return this.findOne(id, database);
+  }
+
+  async remove(id: string | number, database: string): Promise<void> {
+    const existingPaciente = await this.findOne(id, database);
+    if (!existingPaciente) {
+      throw new NotFoundException('Paciente no encontrado');
+    }
+
+    if (database === 'pg') {
+      await this.pacienteRepository.delete(id);
+    } else if (database === 'mongo') {
+      await this.pacienteModel.findByIdAndRemove(id).exec();
+    } else {
+      throw new BadRequestException('Base de datos no válida');
     }
   }
 
-  async update(id: number, paciente: PacienteEntity): Promise<PacienteEntity> {
-    if (process.env.DB_TYPE === 'pg') {
-      await this.pacienteRepositoryPG.update(id, paciente);
-      return this.pacienteRepositoryPG.findOne(id);
-    } else if (process.env.DB_TYPE === 'mongo') {
-      return this.pacienteModelMongo.findByIdAndUpdate(id, paciente, { new: true }).exec();
-    }
-  }
-
-  async remove(id: number): Promise<void> {
-    if (process.env.DB_TYPE === 'pg') {
-      await this.pacienteRepositoryPG.delete(id);
-    } else if (process.env.DB_TYPE === 'mongo') {
-      await this.pacienteModelMongo.findByIdAndRemove(id).exec();
+  async findAll(database: string): Promise<PacienteEntity[] | PacienteModel[]> {
+    if (database === 'pg') {
+      return this.pacienteRepository.find();
+    } else if (database === 'mongo') {
+      return this.pacienteModel.find().exec();
+    } else {
+      throw new BadRequestException('Base de datos no válida');
     }
   }
 }

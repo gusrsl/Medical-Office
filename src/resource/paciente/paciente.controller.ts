@@ -1,33 +1,66 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
+// paciente.controller.ts
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  Query,
+  UsePipes,
+  ValidationPipe,
+  ParseIntPipe,
+  ParseArrayPipe,
+} from '@nestjs/common';
 import { PacienteService } from './paciente.service';
 import { PacienteEntity } from './entities/paciente.entity';
+import { PacienteModel } from './model/paciente.model';
+import { CreatePacienteDto } from './dto/create-paciente.dto';
 
-@Controller('paciente')
+@Controller('pacientes')
 export class PacienteController {
   constructor(private readonly pacienteService: PacienteService) {}
 
   @Post()
-  async create(@Body() paciente: PacienteEntity): Promise<PacienteEntity> {
-    return await this.pacienteService.create(paciente);
-  }
-
-  @Get()
-  async findAll(): Promise<PacienteEntity[]> {
-    return await this.pacienteService.findAll();
+  async createPaciente(
+    @Body() createPacienteDto: CreatePacienteDto,
+    @Query('database') database: string,
+  ): Promise<PacienteEntity | PacienteModel> {
+    return this.pacienteService.create(createPacienteDto, database);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<PacienteEntity> {
-    return await this.pacienteService.findOne(id);
+  async getPaciente(
+    @Param('id', ParseIntPipe) id: string | number,
+    @Query('database') database: string,
+  ): Promise<PacienteEntity | PacienteModel> {
+    return this.pacienteService.findOne(id, database);
   }
 
   @Put(':id')
-  async update(@Param('id') id: number, @Body() paciente: PacienteEntity): Promise<PacienteEntity> {
-    return await this.pacienteService.update(id, paciente);
+  async updatePaciente(
+    @Param('id', ParseIntPipe) id: string | number,
+    @Body() updatePacienteDto: CreatePacienteDto,
+    @Query('database') database: string,
+  ): Promise<PacienteEntity | PacienteModel> {
+    return this.pacienteService.update(id, updatePacienteDto, database);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<void> {
-    await this.pacienteService.remove(id);
+  async removePaciente(
+    @Param('id', ParseIntPipe) id: string | number,
+    @Query('database') database: string,
+  ): Promise<void> {
+    return this.pacienteService.remove(id, database);
   }
+
+  @Get()
+  async getPacientes(@Query('database') database: string): Promise<PacienteEntity[] | PacienteModel[]> {
+    return this.pacienteService.findAll(database);
+  }
+  
 }
