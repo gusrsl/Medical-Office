@@ -12,10 +12,10 @@ import { RecetaMedicaModule } from './resource/receta-medica/receta-medica.modul
 import { EnfermedadModule } from './resource/enfermedad/enfermedad.module';
 import { LaboratorioModule } from './resource/laboratorio/laboratorio.module';
 import { ResultadoExamenModule } from './resource/resultado-examen/resultado-examen.module';
+import { MedicamentoModule } from './resource/medicamento/medicamento.module';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
-import { MedicamentoModule } from './resource/medicamento/medicamento.module';
 import * as dotenv from 'dotenv';
 
 dotenv.config(); // Cargar variables de entorno desde .env

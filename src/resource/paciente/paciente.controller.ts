@@ -11,10 +11,7 @@ import {
   Param,
   Body,
   Query,
-  UsePipes,
-  ValidationPipe,
   ParseIntPipe,
-  ParseArrayPipe,
 } from '@nestjs/common';
 import { PacienteService } from './paciente.service';
 import { PacienteEntity } from './entities/paciente.entity';
@@ -59,8 +56,7 @@ export class PacienteController {
   }
 
   @Get()
-  async getPacientes(@Query('database') database: string): Promise<PacienteEntity[] | PacienteModel[]> {
+  async getPacientes(@Query('database') database: string[]): Promise<any> {
     return this.pacienteService.findAll(database);
   }
-  
 }

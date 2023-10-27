@@ -8,7 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PacienteEntity } from './entities/paciente.entity';
 import { PacienteSchema } from './model/paciente.model';
-import { DataSource } from 'typeorm';
 
 @Module({
   imports: [

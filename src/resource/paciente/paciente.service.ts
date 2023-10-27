@@ -20,7 +20,6 @@ export class PacienteService {
     private pacienteModel: Model<PacienteModel>,
   ) {}
 
-  
   async create(createPacienteDto: CreatePacienteDto, database: string): Promise<PacienteEntity | PacienteModel> {
     if (database === 'pg') {
       const newPaciente = this.pacienteRepository.create(createPacienteDto);
@@ -38,13 +37,11 @@ export class PacienteService {
       if (typeof id === 'string') {
         throw new BadRequestException('ID de Paciente no válido para PostgreSQL');
       }
-  
-      return this.pacienteRepository.findOne({ where: { id: id } });
+      return this.pacienteRepository.findOne({ where: { id } });
     } else if (database === 'mongo') {
       if (typeof id === 'number') {
         throw new BadRequestException('ID de Paciente no válido para MongoDB');
       }
-  
       return this.pacienteModel.findById(id).exec();
     } else {
       throw new BadRequestException('Base de datos no válida');
@@ -83,13 +80,21 @@ export class PacienteService {
     }
   }
 
-  async findAll(database: string): Promise<PacienteEntity[] | PacienteModel[]> {
-    if (database === 'pg') {
-      return this.pacienteRepository.find();
-    } else if (database === 'mongo') {
-      return this.pacienteModel.find().exec();
-    } else {
-      throw new BadRequestException('Base de datos no válida');
+  async findAll(database: string[]): Promise<any> {
+    const results: any = {};
+
+    if (database.includes('pg')) {
+      results.pgData = await this.pacienteRepository.find();
     }
+
+    if (database.includes('mongo')) {
+      results.mongoData = await this.pacienteModel.find().exec();
+    }
+
+    if (results.pgData || results.mongoData) {
+      return results;
+    }
+
+    throw new BadRequestException('Base de datos no válida');
   }
 }
