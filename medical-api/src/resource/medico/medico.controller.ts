@@ -1,34 +1,50 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+// medico.controller.ts
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, ParseIntPipe } from '@nestjs/common';
 import { MedicoService } from './medico.service';
+import { MedicoEntity } from './entities/medico.entity';
+import { MedicoModel } from './model/medico.model';
 import { CreateMedicoDto } from './dto/create-medico.dto';
-import { UpdateMedicoDto } from './dto/update-medico.dto';
 
-@Controller('medico')
+@Controller('medicos')
 export class MedicoController {
   constructor(private readonly medicoService: MedicoService) {}
 
   @Post()
-  create(@Body() createMedicoDto: CreateMedicoDto) {
-    return this.medicoService.create(createMedicoDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.medicoService.findAll();
+  async createMedico(
+    @Body() createMedicoDto: CreateMedicoDto,
+    @Query('database') database: string,
+  ): Promise<MedicoEntity | MedicoModel> {
+    return this.medicoService.create(createMedicoDto, database);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.medicoService.findOne(+id);
+  async getMedico(
+    @Param('id', ParseIntPipe) id: string | number,
+    @Query('database') database: string,
+  ): Promise<MedicoEntity | MedicoModel> {
+    return this.medicoService.findOne(id, database);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMedicoDto: UpdateMedicoDto) {
-    return this.medicoService.update(+id, updateMedicoDto);
+  @Put(':id')
+  async updateMedico(
+    @Param('id', ParseIntPipe) id: string | number,
+    @Body() updateMedicoDto: CreateMedicoDto,
+    @Query('database') database: string,
+  ): Promise<MedicoEntity | MedicoModel> {
+    return this.medicoService.update(id, updateMedicoDto, database);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.medicoService.remove(+id);
+  async removeMedico(
+    @Param('id', ParseIntPipe) id: string | number,
+    @Query('database') database: string,
+  ): Promise<void> {
+    return this.medicoService.remove(id, database);
+  }
+
+  @Get()
+  async getMedicos(@Query('database') database: string): Promise<MedicoEntity[] | MedicoModel[]> {
+    return this.medicoService.findAll(database);
   }
 }

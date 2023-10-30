@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Test, TestingModule } from '@nestjs/testing';
 import { HistorialMedicoController } from './historial_medico.controller';
 import { HistorialMedicoService } from './historial_medico.service';

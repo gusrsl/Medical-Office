@@ -1,34 +1,42 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ConsultorioService } from './consultorio.service';
-import { CreateConsultorioDto } from './dto/create-consultorio.dto';
-import { UpdateConsultorioDto } from './dto/update-consultorio.dto';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
+// consultorio.controller.ts
 
-@Controller('consultorio')
+import { Controller, Get, Post, Put, Delete, Param, Body, Query } from '@nestjs/common';
+import { ConsultorioService } from './consultorio.service';
+import { ConsultorioEntity } from './entities/consultorio.entity';
+import { ConsultorioModel } from './model/consultorio.model';
+import { CreateConsultorioDto } from './dto/create-consultorio.dto';
+
+@Controller('consultorios')
 export class ConsultorioController {
   constructor(private readonly consultorioService: ConsultorioService) {}
 
   @Post()
-  create(@Body() createConsultorioDto: CreateConsultorioDto) {
-    return this.consultorioService.create(createConsultorioDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.consultorioService.findAll();
+  createConsultorio(@Body() createConsultorioDto: CreateConsultorioDto, @Query('database') database: string) {
+    return this.consultorioService.create(createConsultorioDto, database);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.consultorioService.findOne(+id);
+  getConsultorio(@Param('id') id: string, @Query('database') database: string) {
+    return this.consultorioService.findOne(id, database);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateConsultorioDto: UpdateConsultorioDto) {
-    return this.consultorioService.update(+id, updateConsultorioDto);
+  @Put(':id')
+  updateConsultorio(@Param('id') id: string, @Body() updateConsultorioDto: CreateConsultorioDto, @Query('database') database: string) {
+    return this.consultorioService.update(id, updateConsultorioDto, database);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.consultorioService.remove(+id);
+  removeConsultorio(@Param('id') id: string, @Query('database') database: string) {
+    return this.consultorioService.remove(id, database);
+  }
+
+  @Get()
+  getConsultorios(@Query('database') database: string | string[]) {
+    // Convierte a un arreglo si es un solo valor
+    const databases = Array.isArray(database) ? database : [database];
+    return this.consultorioService.findAll(databases);
   }
 }

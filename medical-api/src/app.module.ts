@@ -16,8 +16,8 @@ import { MedicamentoModule } from './resource/medicamento/medicamento.module';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
+import { NotifiiModule } from './websocket/notifii/notifii.module';
 import * as dotenv from 'dotenv';
-
 dotenv.config(); // Cargar variables de entorno desde .env
 
 
@@ -46,6 +46,7 @@ dotenv.config(); // Cargar variables de entorno desde .env
     }),
     MongooseModule.forRoot(process.env.MONGODB_URI),
     MedicamentoModule,
+    NotifiiModule,
   ],
   controllers: [AppController],
   providers: [AppService],

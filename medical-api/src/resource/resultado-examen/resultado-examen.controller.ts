@@ -1,34 +1,50 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, BadRequestException, NotFoundException } from '@nestjs/common';
 import { ResultadoExamenService } from './resultado-examen.service';
-import { CreateResultadoExamanDto } from './dto/create-resultado-examan.dto';
-import { UpdateResultadoExamanDto } from './dto/update-resultado-examan.dto';
 
 @Controller('resultado-examen')
 export class ResultadoExamenController {
   constructor(private readonly resultadoExamenService: ResultadoExamenService) {}
 
   @Post()
-  create(@Body() createResultadoExamanDto: CreateResultadoExamanDto) {
-    return this.resultadoExamenService.create(createResultadoExamanDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.resultadoExamenService.findAll();
+  async create(@Body() createResultadoExamenDto: any, @Query('database') database: string) {
+    if (database !== 'pg' && database !== 'mongo') {
+      throw new BadRequestException('Base de datos no válida');
+    }
+    return this.resultadoExamenService.create(createResultadoExamenDto, database);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.resultadoExamenService.findOne(+id);
+  async findOne(@Param('id') id: string, @Query('database') database: string) {
+    if (database !== 'pg' && database !== 'mongo') {
+      throw new BadRequestException('Base de datos no válida');
+    }
+    return this.resultadoExamenService.findOne(id, database);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateResultadoExamanDto: UpdateResultadoExamanDto) {
-    return this.resultadoExamenService.update(+id, updateResultadoExamanDto);
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() updateResultadoExamenDto: any, @Query('database') database: string) {
+    if (database !== 'pg' && database !== 'mongo') {
+      throw new BadRequestException('Base de datos no válida');
+    }
+    return this.resultadoExamenService.update(id, updateResultadoExamenDto, database);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.resultadoExamenService.remove(+id);
+  async remove(@Param('id') id: string, @Query('database') database: string) {
+    if (database !== 'pg' && database !== 'mongo') {
+      throw new BadRequestException('Base de datos no válida');
+    }
+    await this.resultadoExamenService.remove(id, database);
+  }
+
+  @Get()
+  async findAll(@Query('database') database: string) {
+    if (database !== 'pg' && database !== 'mongo') {
+      throw new BadRequestException('Base de datos no válida');
+    }
+    return this.resultadoExamenService.findAll(database);
   }
 }

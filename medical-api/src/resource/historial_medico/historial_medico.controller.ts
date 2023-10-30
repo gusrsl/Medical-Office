@@ -1,34 +1,53 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, BadRequestException, NotFoundException } from '@nestjs/common';
 import { HistorialMedicoService } from './historial_medico.service';
+import { HistorialMedicoEntity } from './entities/historial_medico.entity';
+import { HistorialMedicoModel } from './model/historial-medico.model';
 import { CreateHistorialMedicoDto } from './dto/create-historial_medico.dto';
-import { UpdateHistorialMedicoDto } from './dto/update-historial_medico.dto';
 
-@Controller('historial-medico')
+@Controller('historialmedico')
 export class HistorialMedicoController {
   constructor(private readonly historialMedicoService: HistorialMedicoService) {}
 
-  @Post()
-  create(@Body() createHistorialMedicoDto: CreateHistorialMedicoDto) {
-    return this.historialMedicoService.create(createHistorialMedicoDto);
+  @Get(':id')
+  async findOne(@Param('id') id: string, @Query('database') database: string): Promise<HistorialMedicoEntity | HistorialMedicoModel> {
+    if (!id || !database) {
+      throw new BadRequestException('ID o base de datos no proporcionados');
+    }
+    return this.historialMedicoService.findOne(id, database);
   }
 
   @Get()
-  findAll() {
-    return this.historialMedicoService.findAll();
+  async findAll(@Query('database') database: string): Promise<HistorialMedicoEntity[] | HistorialMedicoModel[]> {
+    if (!database) {
+      throw new BadRequestException('Base de datos no proporcionada');
+    }
+    return this.historialMedicoService.findAll(database);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.historialMedicoService.findOne(+id);
+  @Post()
+  async create(@Body() createHistorialMedicoDto: CreateHistorialMedicoDto, @Query('database') database: string): Promise<HistorialMedicoEntity | HistorialMedicoModel> {
+    if (!database) {
+      throw new BadRequestException('Base de datos no proporcionada');
+    }
+    return this.historialMedicoService.create(createHistorialMedicoDto, database);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateHistorialMedicoDto: UpdateHistorialMedicoDto) {
-    return this.historialMedicoService.update(+id, updateHistorialMedicoDto);
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() updateHistorialMedicoDto: CreateHistorialMedicoDto, @Query('database') database: string): Promise<HistorialMedicoEntity | HistorialMedicoModel> {
+    if (!id || !database) {
+      throw new BadRequestException('ID o base de datos no proporcionados');
+    }
+    return this.historialMedicoService.update(id, updateHistorialMedicoDto, database);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.historialMedicoService.remove(+id);
+  async remove(@Param('id') id: string, @Query('database') database: string): Promise<void> {
+    if (!id || !database) {
+      throw new BadRequestException('ID o base de datos no proporcionados');
+    }
+    await this.historialMedicoService.remove(id, database);
   }
 }
